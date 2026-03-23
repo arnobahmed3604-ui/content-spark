@@ -171,7 +171,7 @@ export default function GeneratorPage() {
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
                         onClick={() => handleCopy(r.id, r.content)}
                       >
-                        {copiedId === r.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        {copiedId === r.id ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                       </Button>
                       <Button
                         variant="ghost"
