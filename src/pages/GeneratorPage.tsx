@@ -1,52 +1,80 @@
-import { useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { GlassCard } from "@/components/GlassCard";
-import { AnimatedSection } from "@/components/AnimatedSection";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Wand2, Copy, RefreshCw, Twitter, FileText, Linkedin, BookOpen, Loader2, Check } from "lucide-react";
-import { generateContent, saveToHistory, type OutputFormat, type GeneratedContent } from "@/lib/ai-service";
+import { useState } from 'react';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { GlassCard } from '@/components/GlassCard';
+import { AnimatedSection } from '@/components/AnimatedSection';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import {
+  Wand2,
+  Copy,
+  RefreshCw,
+  Twitter,
+  FileText,
+  Linkedin,
+  BookOpen,
+  Loader2,
+  Check,
+} from 'lucide-react';
+import {
+  generateContent,
+  saveToHistory,
+  type OutputFormat,
+  type GeneratedContent,
+} from '@/lib/ai-service';
 
-const FORMAT_OPTIONS: { id: OutputFormat; label: string; icon: React.ElementType }[] = [
-  { id: "tweets", label: "Tweets", icon: Twitter },
-  { id: "summary", label: "Summary", icon: BookOpen },
-  { id: "blog", label: "Blog Post", icon: FileText },
-  { id: "linkedin", label: "LinkedIn", icon: Linkedin },
+const FORMAT_OPTIONS: {
+  id: OutputFormat;
+  label: string;
+  icon: React.ElementType;
+}[] = [
+  { id: 'tweets', label: 'Tweets', icon: Twitter },
+  { id: 'summary', label: 'Summary', icon: BookOpen },
+  { id: 'blog', label: 'Blog Post', icon: FileText },
+  { id: 'linkedin', label: 'LinkedIn', icon: Linkedin },
 ];
 
 export default function GeneratorPage() {
-  const [input, setInput] = useState("");
-  const [selectedFormats, setSelectedFormats] = useState<OutputFormat[]>(["tweets"]);
+  const [input, setInput] = useState('');
+  const [selectedFormats, setSelectedFormats] = useState<OutputFormat[]>([
+    'tweets',
+  ]);
   const [results, setResults] = useState<GeneratedContent[]>([]);
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const toggleFormat = (id: OutputFormat) => {
     setSelectedFormats(prev =>
-      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id],
     );
   };
 
   const handleGenerate = async () => {
     if (!input.trim()) {
-      toast.error("Please enter some content or a YouTube URL");
+      toast.error('Please enter some content or a YouTube URL');
       return;
     }
     if (selectedFormats.length === 0) {
-      toast.error("Select at least one output format");
+      toast.error('Select at least one output format');
       return;
     }
 
     setLoading(true);
     setResults([]);
     try {
-      const response = await generateContent({ input, formats: selectedFormats });
+      const response = await generateContent({
+        input,
+        formats: selectedFormats,
+      });
       setResults(response.results);
       saveToHistory(input, response.results);
-      toast.success("Content generated successfully!");
-    } catch {
-      toast.error("Generation failed. Please try again.");
+      toast.success('Content generated successfully!');
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Generation failed. Please try again.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -55,7 +83,7 @@ export default function GeneratorPage() {
   const handleCopy = async (id: string, content: string) => {
     await navigator.clipboard.writeText(content);
     setCopiedId(id);
-    toast.success("Copied to clipboard");
+    toast.success('Copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -63,23 +91,32 @@ export default function GeneratorPage() {
     setLoading(true);
     try {
       const response = await generateContent({ input, formats: [format] });
-      setResults(prev => prev.map(r => r.format === format ? response.results[0] : r));
-      toast.success("Regenerated!");
-    } catch {
-      toast.error("Regeneration failed.");
+      setResults(prev =>
+        prev.map(r => (r.format === format ? response.results[0] : r)),
+      );
+      toast.success('Regenerated!');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Regeneration failed.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatLabel = (f: OutputFormat) => FORMAT_OPTIONS.find(o => o.id === f)?.label || f;
+  const formatLabel = (f: OutputFormat) =>
+    FORMAT_OPTIONS.find(o => o.id === f)?.label || f;
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8">
         <AnimatedSection>
-          <h1 className="text-2xl font-bold tracking-tight">Content Generator</h1>
-          <p className="text-muted-foreground mt-1">Paste your content or YouTube URL and select output formats.</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Content Generator
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Paste your content or YouTube URL and select output formats.
+          </p>
         </AnimatedSection>
 
         {/* Input */}
@@ -104,8 +141,8 @@ export default function GeneratorPage() {
                       onClick={() => toggleFormat(f.id)}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 active:scale-[0.97] ${
                         selected
-                          ? "gradient-bg text-primary-foreground shadow-lg shadow-primary/20"
-                          : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                          ? 'gradient-bg text-primary-foreground shadow-lg shadow-primary/20'
+                          : 'bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary'
                       }`}
                     >
                       <f.icon className="w-4 h-4" />
@@ -171,7 +208,11 @@ export default function GeneratorPage() {
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
                         onClick={() => handleCopy(r.id, r.content)}
                       >
-                        {copiedId === r.id ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+                        {copiedId === r.id ? (
+                          <Check className="w-4 h-4 text-primary" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
